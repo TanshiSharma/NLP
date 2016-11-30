@@ -13,17 +13,12 @@ def create_review_title_map():
     for files in os.listdir(review_directory_path):
         files_title=files.split('_')[1].split('.')[0]
         review_path=os.path.join(review_directory_path,files)
-        #print(review_path)
 
         if files_title in title_path_dict:
             continue
         else:
             title_path_dict[files_title]=review_path
-#
-#
-#
-#
-#
+
 #
 def read_meta_data():
     global title_path_dict
@@ -37,20 +32,13 @@ def read_meta_data():
             movie_actor_list=rows[5].split(',')
             movie_director_list=rows[4].split(',')
             movie_title=rows[3]
-            # print(movie_title)
-        #
+
         if movie_title in title_path_dict:
 
             create_replace_name_map(movie_actor_list,movie_director_list,title_path_dict[movie_title],movie_title)
 
         else:
-            #print("not in the 100 of title_dict")
             print(movie_title)
-
-
-
-
-
 
 
 def create_replace_name_map(actor_list,director_list,reviews_file_path,title_id):
@@ -76,8 +64,6 @@ def create_replace_name_map(actor_list,director_list,reviews_file_path,title_id)
             actor_name=actor.split(' ')
             for names in actor_name:
                 actor_dict[names]=' MOVIE_CAST '
-
-   # print(actor_list)
 
 
     for director in director_list:
@@ -109,13 +95,10 @@ def create_replace_name_map(actor_list,director_list,reviews_file_path,title_id)
         for punctuations in punct_list:
             reviews['review']=reviews['review'].replace(punctuations,' %s '%punctuations)
 
-        #print(reviews['review'])
 
         for key,value in director_dict.items():
-        #print(key,director_dict[key])
             reviews['review']=reviews['review'].replace(key,value)
 
-    #print(reviews['review'])
 
         for key,value in actor_dict.items():
             reviews['review']=reviews['review'].replace(key,value)
@@ -132,7 +115,8 @@ def create_replace_name_map(actor_list,director_list,reviews_file_path,title_id)
 
 
     output.close()
-    #review.close()
+
+
 create_review_title_map()
 read_meta_data()
 #create_replace_name_map(['Hugo Weaving','Natalie Portman','Rupert Graves','Stephen Rea'],['James McTeigue'],'/home/tanshi/Downloads/CSCI544_Final_Project/scrapyIMDB/data/reviews_tt0434409.json','tt0434409')
