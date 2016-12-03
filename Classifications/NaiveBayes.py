@@ -8,27 +8,26 @@ top_words = []
 
 
 def word_feats(words):
-
     return dict([(word, True) for word in words])
-
-
-def words_feats(words):
-    return dict([(word, True) if word in top_words else (word,False) for word in words.split()])
-
 
 
 def train():
     #get all negative movie ids
     negids = movie_reviews.fileids('neg')
     posids = movie_reviews.fileids('pos')
-    print(type((word_feats(movie_reviews.words(fileids=['neg/cv000_29416.txt'])), 'neg')))
     #convert into feature set
     negfeats = [(word_feats(movie_reviews.words(fileids=[f])), 'neg') for f in negids]
     posfeats = [(word_feats(movie_reviews.words(fileids=[f])), 'pos') for f in posids]
 
+    #negcutoff = len(negfeats)*3/4
+    #poscutoff = len(posfeats)*3/4
+
+
     trainfeats = negfeats + posfeats
     print(type(trainfeats[0]))
-    
+    #testing_set = negfeats[int(negcutoff):] + posfeats[int(poscutoff):]
+    #classifier = nltk.MaxentClassifier.train(trainfeats)
+    #print(trainfeats[0])
     classifier = nltk.NaiveBayesClassifier.train(trainfeats)
     return classifier
 
@@ -74,9 +73,82 @@ def test(classifier):
     return
 
 
+def moviescore():
+    movie_score = dict()
+    with open('D:/Projects/NLP/movie_list_with_director.csv','r') as infile:
+        reader = csv.reader(infile)
+        next(reader)
+
+        for row in reader:
+            score = row[0].strip()
+            if float(score) >= 7:
+                sentiment = 'pos'
+            else:
+                sentiment = 'neg'
+            name = 'reviews_' + row[4].strip()
+            movie_score[name] = sentiment
+    #print(movie_score)
+    return movie_score
+
+
+def classification_accuracy(movie):
+    review = dict()
+    total = dict()
+    correct = dict()
+    with open('Naive Bayes results.csv','r') as infile:
+        reader = csv.reader(infile)
+        next(reader)
+        for row in reader:
+            name = row[0]
+            #imdb = row[1]
+            naive = row[2]
+            if name in total:
+                total[name]+=1
+            else:
+                total[name] = 1
+            if naive == 'pos':
+                if name in correct:
+                    correct[name] +=1
+                else:
+                    correct[name] = 1
+    for name in total:
+        review[name] = float(correct[name]/total[name])*100
+
+    with open('Naive Bayes accuracy.csv','w') as out:
+        out.write('Movie Name,Positive reviews, Negative Reviews\n')
+        for data in total:
+            if review[data] > (100 - review[data]):
+                val = 'Positive'
+            else:
+                val = 'Negative'
+            out.write(data.replace('reviews_','') + ',' + str(review[data]) + ',' + str(100 - review[data]) + ',' + val +'\n')
+
+    return
+
+
+def movie_names():
+    names = dict()
+    score = dict()
+    with open('movie_list_with_director.csv','r') as infile:
+        reader = csv.reader(infile)
+        next(reader)
+        for row in reader:
+            name = row[3].strip()
+            cal = row[0].strip()
+            name = name.replace(',','')
+            title = row[4].strip()
+            names[title] = name
+            cal = float(cal)
+            score[title] = cal
+    return score
+
 if __name__ == '__main__':
     top_words = find_top_words()
+    print('movie score')
+    movie = movie_names()
+    #score = moviescore()
     print('classify')
-    classifiers = train()
+    #classifiers = train()
     print('test')
-    test(classifiers)
+    #test(classifiers)
+    classification_accuracy(movie)
